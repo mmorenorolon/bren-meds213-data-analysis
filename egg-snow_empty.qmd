@@ -40,13 +40,17 @@ sites_data <- read_csv(here(path_raw, sites_csv))
 eggs_data <- read_csv(here(path_raw, eggs_csv))
 
 species_data <- read_csv(here(path_raw, species_csv))
+
+nests_data <- read_csv(here(path_raw, nests_csv))
 ```
 
 
 Let's compute the number of eggs per nest. The column `Egg-num` seems to be a good candidate to estimate the number of eggs per nest:
 
 ```{r}
-eggs_sum <- eggs_data %>%
+eggs_sum <- eggs_data %>% 
+  group_by(Site, Year, Nest_ID) %>% 
+  summarize(n_egg = max(Egg_num)) 
   
 ```
 
@@ -54,20 +58,23 @@ Then we can join with the nest table to bring the species information:
 
 ```{r}
 nest_species <- eggs_sum %>%
-  
+  left_join(eggs_sum, nests_data, by = "Nest_ID")
 ```
 
 Now we can group by species:
 
 ```{r}
 nest_species_avg <- nest_species %>%
+  group_by("Species") %>% 
+  summarise(avg_egg_numb = mean(n_egg.x))
   
 ```
 
 Finally it would be better to have the name of the species and not only the 4-letter acronym:
 
 ```{r}
-nest_species_avg <- nest_species_avg %>%
+nest_species_avg <- nest_species_avg %>% 
+  arrange(desc(avg_egg_n))
   
 ```
 
