@@ -124,14 +124,18 @@ glimpse(snowcover_data)
 The Date is stored as a character :/, we thus first we need to transform the date in date format before computing the monthly aggregate:
 
 ```{r}
+
 snowcover_data_fixed <- snowcover_data %>%
+  mutate(Date2 = lubridate::as_date(Date))
   
+
 ```
 
 We have 72 errors. Let's have a look at the date which failed:
 
 ```{r}
 snowcover_data_fixed %>% 
+  # 
 
 ```
 
@@ -162,7 +166,10 @@ Now let's compute the monthly statistics
 ```{r}
 # adding the snow days with a threshold at 10%
 snowcover_month <- snowcover_data_fixed %>%
-  
+  mutate(Month = month(Date2)) %>%
+  group_by(Month, Site) %>% 
+  summarise(avg_snow_cover = mean(Snow_cover, na.rm = TRUE))
+
 ```
 
  
@@ -171,7 +178,7 @@ snowcover_month <- snowcover_data_fixed %>%
 Since now we have the months in common, we can use them to join our two datasets:
 
 ```{r}
-nests_snow_month <- 
+nests_snow_month <- left_join(snowcover_month, nest_species, by = )
 ```
 
 Well in the end we did not have much information by months (mainly 2 months per year focused on June and July), so let's aggregate by year instead:
